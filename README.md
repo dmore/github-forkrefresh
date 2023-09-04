@@ -24,7 +24,7 @@ What does it do:
        "yourgithubuser/yourpublicfork2"
     ]
 
-    Tells github to refresh the fork from the original so your public forks are refreshed from the source.
+    Tells github to refresh the fork from the original branch, so your public forks are refreshed from the source.
 
 What does it need:
 ==================

@@ -30,7 +30,7 @@ func store_secret_on_keychain(token string ){
     //if you want to inject it onto or from an env var...
     //password := token
     //os.Setenv("GITHUB_TOKEN",password)
-    //password = envVariable("GITHUB_TOKEN")
+    //password = os.Getenv("GITHUB_TOKEN")
   
     // set password
     err := keyring.Set(service, user, password)
@@ -59,7 +59,7 @@ func retrieve_secret_from_keychain() (string){
 func main() {
 
 	//uncomment to store your secret o keychain
-	//store_secret_on_keychain("GITHUBKEY")
+	//store_secret_on_keychain("GITHUB_TOKEN")
 	token_variable = retrieve_secret_from_keychain()
 
 	//file must be json array not json
@@ -156,7 +156,7 @@ func main() {
 
 }
 
-// gets the branch that was originally used to fork
+
 func fork_get_query_branch(reponame string) (string, error) {
 
 	reponame = strings.TrimSuffix(reponame, "/")
@@ -203,8 +203,9 @@ func fork_get_query_branch(reponame string) (string, error) {
 	    case string:
 	    	if k == "name" {
 	    		return_branch = string(c)
+	    		fmt.Printf("Item %q is a string, containing %q\n", k, c)
 	    	}
-	        fmt.Printf("Item %q is a string, containing %q\n", k, c)
+	        
 	    case float64:
 	        //fmt.Printf("Looks like item %q is a number, specifically %f\n", k, c)
 	        continue
@@ -223,7 +224,6 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
 	jsonObj := gabs.New()
 	// or gabs.Wrap(jsonObject) to work on an existing map[string]interface{}
 
-	//jsonObj.Set("branch", "" + branch)
 	jsonObj.Set("" + branch, "branch")
 
 	jsonOutput := jsonObj.String()
@@ -232,8 +232,7 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
 	fmt.Println(jsonObj.StringIndent("", "  "))
 
 	var jsonStr = []byte(jsonOutput)
-    //req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-
+   
 	reponame = strings.TrimSuffix(reponame, "/")
 	reponame = strings.TrimPrefix(reponame, "/")
 
@@ -254,13 +253,11 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
 	defer response.Body.Close()
 
 	b, err := io.ReadAll(response.Body)
-	// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
 	if err != nil {
 		log.Fatalln(err)
 		return "nil", err
 	}
 
-	//fmt.Println("response :", response.Errorf)
 	fmt.Println("response Status:", response.Status)
 	fmt.Println("response Body:", string(b))
 	return string(b), nil
