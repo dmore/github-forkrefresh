@@ -1,8 +1,10 @@
 [
+  "dmore/cruise-control-cluster-mgmt",
+  "dmore/cruise-control-cluster-mgmt",
+  "dmore/cruise-control-cluster-mgmt",
   "dmore/geodesic",
   "dmore/terraform-provider-scaffolding-framework",
   "dmore/awesome-terraform",
-  "dmore/cruise-control-cluster-mgmt",
   "dmore/atmos",
   "dmore/wonsz" ,
   "dmore/atmos-simplygenius",
