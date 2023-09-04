@@ -156,7 +156,7 @@ func main() {
 
 }
 
-
+// gets the branch that was originally used to fork
 func fork_get_query_branch(reponame string) (string, error) {
 
 	reponame = strings.TrimSuffix(reponame, "/")
