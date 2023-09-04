@@ -65,16 +65,25 @@ How to run it:
 
 ```go
 func fork_refresh_call(branch string, reponame string, method string) (string, error) {
-    absPath, _ := filepath.Abs("../"+ branch + ".json")
-    f, err := os.Open(absPath)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer f.Close()
+    
+    //now that we know the branch name in advance we can generate json dynamically.
+    jsonObj := gabs.New()
+    
+    jsonObj.Set("" + branch, "branch")
+
+    jsonOutput := jsonObj.String()
+
+    //fmt.Println(jsonObj.String())
+    //fmt.Println(jsonObj.StringIndent("", "  "))
+
+    var jsonStr = []byte(jsonOutput)
+   
+    reponame = strings.TrimSuffix(reponame, "/")
+    reponame = strings.TrimPrefix(reponame, "/")
 
     httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
     fmt.Println("url: %v", httpposturl)
-    request, err := http.NewRequest("POST", httpposturl, f)
+    request, err := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonStr))
     if err != nil {
         log.Fatal(err)
     }
@@ -87,14 +96,15 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
         log.Fatal(err)
     }
     defer response.Body.Close()
-    //fmt.Println("response :", response.Errorf)
-    fmt.Println("response Status:", response.Status)
+
     b, err := io.ReadAll(response.Body)
-    // b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
     if err != nil {
         log.Fatalln(err)
         return "nil", err
     }
+
+    fmt.Println("response Status:", response.Status)
+    fmt.Println("response Body:", string(b))
     return string(b), nil
     //return fmt.Println(string(b))
 }
