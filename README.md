@@ -15,7 +15,8 @@ Very basic app that Will refresh the oiginal project from your public forks so t
 What does it do:
 ===============
 
-    It calls github api fork refresh so your public forks are up-to-date with its source.
+    It calls github api to discover what branch is used on the forking. Uses that to post it to the fork refresh so your public forks are up-to-date with its source and ought to trigger a remote refresh of them branches.
+    
     there is a repos_repo.json json array file. make sure your forking public repos are there.
     That is your forks, not the originals.
 
@@ -28,6 +29,7 @@ What does it do:
     if works ok if parent repos use master and main branchs. forking from develop should also work. 
 
     tells github to refresh the fork from the original so your public forks are refreshed from the source.
+
 
 What does it need:
 ==================
@@ -55,6 +57,8 @@ Dependencies:
     Depends on zalando/go-keyring to retrieve and pull secrets. Currently using version 0.2.3.
     I would have used a different approach but for this this is fine.
 
+    Also uses Jeffail/gabs to construct the expected json at the remote end.
+
 How to run it:
 ==============
     cd github-forkrefresh/httpclient
@@ -64,16 +68,28 @@ How to run it:
 
 ```go
 func fork_refresh_call(branch string, reponame string, method string) (string, error) {
-    absPath, _ := filepath.Abs("../"+ branch + ".json")
-    f, err := os.Open(absPath)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer f.Close()
+    //now that we know the branch name in advance we can use that instead of this.
+    
+    jsonObj := gabs.New()
+    // or gabs.Wrap(jsonObject) to work on an existing map[string]interface{}
+
+    //jsonObj.Set("branch", "" + branch)
+    jsonObj.Set("" + branch, "branch")
+
+    jsonOutput := jsonObj.String()
+
+    fmt.Println(jsonObj.String())
+    fmt.Println(jsonObj.StringIndent("", "  "))
+
+    var jsonStr = []byte(jsonOutput)
+    //req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+
+    reponame = strings.TrimSuffix(reponame, "/")
+    reponame = strings.TrimPrefix(reponame, "/")
 
     httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
     fmt.Println("url: %v", httpposturl)
-    request, err := http.NewRequest("POST", httpposturl, f)
+    request, err := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonStr))
     if err != nil {
         log.Fatal(err)
     }
@@ -86,14 +102,17 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
         log.Fatal(err)
     }
     defer response.Body.Close()
-    //fmt.Println("response :", response.Errorf)
-    fmt.Println("response Status:", response.Status)
+
     b, err := io.ReadAll(response.Body)
     // b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
     if err != nil {
         log.Fatalln(err)
         return "nil", err
     }
+
+    //fmt.Println("response :", response.Errorf)
+    fmt.Println("response Status:", response.Status)
+    fmt.Println("response Body:", string(b))
     return string(b), nil
     //return fmt.Println(string(b))
 }
