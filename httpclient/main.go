@@ -77,15 +77,15 @@ func main() {
 	//var result map[string]interface{} not working. 
 	//in memory test works fine also
 	/**
-	var dataJson = `[
-    	"dmore/aws-vault-local-os-keychain-mfa",
-    	"dmore/aws-multi-region-cicd-with-terraform"
-	]`
-	err2 := json.Unmarshal([]byte(dataJson), &arr)
-	if err2 != nil {
-      fmt.Println("error2:", err2)
-      os.Exit(1)
-    }
+		var dataJson = `[
+	    	"dmore/aws-vault-local-os-keychain-mfa",
+	    	"dmore/aws-multi-region-cicd-with-terraform"
+		]`
+		err2 := json.Unmarshal([]byte(dataJson), &arr)
+		if err2 != nil {
+	      fmt.Println("error2:", err2)
+	      os.Exit(1)
+	    }
     **/
 	
 	err3 := json.Unmarshal([]byte(byteValue), &arr)
@@ -180,13 +180,12 @@ func fork_get_query_branch(reponame string) (string, error) {
 	defer response.Body.Close()
 
 	b, err := io.ReadAll(response.Body)
-	// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
+
 	if err != nil {
 		log.Fatalln(err)
 		return "nil", err
 	}
 
-	//fmt.Println("response :", response.Errorf)
 	fmt.Println("response Status:", response.Status)
 	fmt.Println("response Body:", string(b))
 
@@ -205,7 +204,6 @@ func fork_get_query_branch(reponame string) (string, error) {
 	    		return_branch = string(c)
 	    		fmt.Printf("Item %q is a string, containing %q\n", k, c)
 	    	}
-	        
 	    case float64:
 	        //fmt.Printf("Looks like item %q is a number, specifically %f\n", k, c)
 	        continue
@@ -219,17 +217,16 @@ func fork_get_query_branch(reponame string) (string, error) {
 }
 
 func fork_refresh_call(branch string, reponame string, method string) (string, error) {
-	//now that we know the branch name in advance we can use that instead of this.
 	
+	//now that we know the branch name in advance we can generate json dynamically.
 	jsonObj := gabs.New()
-	// or gabs.Wrap(jsonObject) to work on an existing map[string]interface{}
-
+	
 	jsonObj.Set("" + branch, "branch")
 
 	jsonOutput := jsonObj.String()
 
-	fmt.Println(jsonObj.String())
-	fmt.Println(jsonObj.StringIndent("", "  "))
+	//fmt.Println(jsonObj.String())
+	//fmt.Println(jsonObj.StringIndent("", "  "))
 
 	var jsonStr = []byte(jsonOutput)
    
