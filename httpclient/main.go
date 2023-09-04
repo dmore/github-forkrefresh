@@ -91,7 +91,10 @@ func main() {
     log.Printf("Unmarshaled: %v", arr)
     //loop through
     for i := 0; i < len(arr); i++ {
+		
 		var reponame = string(arr[i])
+		reponame = strings.TrimSuffix(reponame, "/")
+		reponame = strings.TrimPrefix(reponame, "/")
 		fmt.Println("reponame: %v", reponame)
 		
 		//LOOP HERE EACH ELEMENT
@@ -159,6 +162,9 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
 	}
 	defer f.Close()
 
+	reponame = strings.TrimSuffix(reponame, "/")
+	reponame = strings.TrimPrefix(reponame, "/")
+	
 	httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
 	fmt.Println("url: %v", httpposturl)
 	request, err := http.NewRequest("POST", httpposturl, f)
