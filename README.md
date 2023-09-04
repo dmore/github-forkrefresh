@@ -26,8 +26,6 @@ What does it do:
        "yourgithubuser/yourpublicfork2"
     ]
 
-    if works ok if parent repos use master and main branchs. forking from develop should also work. 
-
     tells github to refresh the fork from the original so your public forks are refreshed from the source.
 
 
