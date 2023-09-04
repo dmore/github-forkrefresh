@@ -3,7 +3,7 @@ README.md
 github-forkrefresh
 ==================
 
-Very basic app that Will refresh the oiginal project from your public forks so they are updated. I need something like this because I have many forks and want all of them updated so I know what's going on the parent projects. Tested this with hundred or so repos and it was ok.
+Very basic app that will refresh the oiginal project from your public forks so they are updated. I need something like this because I have many forks and want all of them updated so I know what's going on the parent projects. Tested this with hundred or so repos and it was ok.
 
 - Needs GITHUB_TOKEN
 
@@ -72,7 +72,7 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
     }
     defer f.Close()
 
-    httpposturl := "https://api.github.com/repos/" + reponame
+    httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
     fmt.Println("url: %v", httpposturl)
     request, err := http.NewRequest("POST", httpposturl, f)
     if err != nil {

@@ -69,7 +69,7 @@ func main() {
 	//unmarshall
 	byteValue, _ := ioutil.ReadAll(f)   
 	var arr []string
-	//var result map[string]interface{} not working. 
+	
 	//in memory test works fine also
 	/**
 	var dataJson = `[
@@ -159,7 +159,7 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
 	}
 	defer f.Close()
 
-	httpposturl := "https://api.github.com/repos/" + reponame
+	httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
 	fmt.Println("url: %v", httpposturl)
 	request, err := http.NewRequest("POST", httpposturl, f)
 	if err != nil {
