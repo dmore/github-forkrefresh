@@ -1,0 +1,28 @@
+name: Go
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: "on"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      KEYCHAIN_APP_SERVICE: ${{ secrets.KEYCHAIN_APP_SERVICE }}
+      KEYCHAIN_USERNAME: ${{ secrets.KEYCHAIN_USERNAME }}
+      REPOS_GIST: ${{ secrets.REPOS_GIST }}
+    defaults:
+      run:
+        working-directory: httpclient
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+          #cache-dependency-path: go.sum
+      - name: Install dependencies
+        run: go get .
+      - name: Build
+        run: go build -o httpclient/packages/app
+      - name: Test with the Go CLI
+        run: go test

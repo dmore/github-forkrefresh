@@ -21,6 +21,7 @@
 
 # Dependency directories (remove the comment below to include it)
 httpclient/packages/
+packages/app
 
 # Go workspace file
 go.work
