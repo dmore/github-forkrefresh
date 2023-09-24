@@ -2,14 +2,17 @@
 github-forkrefresh
 ==================
 
-Very basic app that will refresh the original source branch from your public forks so they are updated. I needed something like this because I have many forks and want those updated so I know what's going on the parent projects. Tested this with hundred or so repos and it was ok.
+Very basic app that will refresh the oiginal project from your public forks so they are updated. I need something like this because I have many forks and want all of them updated so I know what's going on the parent projects. Tested this with hundred or so repos and it was ok.
 
 - Needs GITHUB_TOKEN
 
 - Stores/retrieves token on your OS/Keychain.
 
-- Needs a list of the public repos you want to keep updated from your original projects.
+- Needs a Gist(as below) or a list of the public repos you want to keep updated from your original projects.
 
+a dockerised variant
+=====================
+- Have created a dockerised solution for this https://github.com/dmore/github-forkrefresh-docker/ 
 
 What does it do:
 ===============
@@ -24,20 +27,21 @@ What does it do:
        "yourgithubuser/yourpublicfork2"
     ]
 
-    Tells github to refresh the fork from the original branch, so your public forks are refreshed from the source.
+    if works ok if parent repos use master and main branchs. forking from develop should also work. 
+
+    tells github to refresh the fork from the original so your public forks are refreshed from the source.
 
 What does it need:
 ==================
 
-
-    a) it needs your public fork repos as above. youruser/yourpublicfork
+    a) it needs your public fork repos as above or a gist (example below). youruser/yourpublicfork
 
     b|) it also uses go-keyring to pull the GITHUB_TOKEN secret from the OS/Keychain
     so you'll need to store the token in the OS/keychain first and retrieve it from there.
 
     Otherwise feel free to change the code and use an env var instead. That code is commented out.
 
-    c) THe github personal token you need for this is of type classic and have workflow permissions token) as well as full private repo permissions. that's all it needs.
+    c) THe github personal token you need for this is classic and have workflow permissions token) as well as full private repo permissions. that's all it needs.
 
     d) you can inject it on a line commmented out. 
 
@@ -52,38 +56,52 @@ Dependencies:
     Depends on zalando/go-keyring to retrieve and pull secrets. Currently using version 0.2.3.
     I would have used a different approach but for this this is fine.
 
-    Also uses Jeffail/gabs to dynamically manage json parsing 
-
 How to run it:
 ==============
     cd github-forkrefresh/httpclient
     go run main.go
 
+    this is the core of it, if you just wanna know
 
+Using a gist:
+============
+- Added an env var to override the repos config with a public gist. Here is a sample one.
 
-    this is the core of it, if you just wanna know:
+```bash
+    export REPOS_GIST="https://gist.githubusercontent.com/dmore/5c26c5c2484aa13736f22d80e8bf4e7e/raw/88ebe3b0d641fc7e8715bfe4056625ac2532953b/repos_repo.json"
+    unset REPOS_GIST
+```
+
+  https://gist.githubusercontent.com/dmore/5c26c5c2484aa13736f22d80e8bf4e7e/raw/88ebe3b0d641fc7e8715bfe4056625ac2532953b/repos_repo.json
+
+  curl -XGET https://gist.githubusercontent.com/dmore/5c26c5c2484aa13736f22d80e8bf4e7e/raw/88ebe3b0d641fc7e8715bfe4056625ac2532953b/repos_repo.json
+
+    [
+      "dmore/tfsec-terraform-scanner",
+      "dmore/okta-quarkus-Java11-app-example-JWT-RBAC-MicroProfile-security-spec-JWT-OIDC-auth",
+      "dmore/dependency-jwt-simple-secure-standard-conformant-impl-rust",
+      "dmore/paseto-platform-agnostic-security-tokens",
+      "dmore/biscuit-delegated-decentr-capabil-based-auth-token",
+      "dmore/github-actions-goat",
+      "dmore/secure-repo-pin-github-actions-commitsha",
+      "dmore/atmos-simplygenius",
+      "dmore/terraform-aws-cicd",
+      "dmore/cloud-platform-terraform-aws-sso",
+      "dmore/aws-multi-region-cicd-with-terraform"
+    ]
 
 ```go
 func fork_refresh_call(branch string, reponame string, method string) (string, error) {
-    
-    //now that we know the branch name in advance we can generate json dynamically.
-    jsonObj := gabs.New()
-    
-    jsonObj.Set("" + branch, "branch")
-
-    jsonOutput := jsonObj.String()
-
-    //fmt.Println(jsonObj.String())
-    //fmt.Println(jsonObj.StringIndent("", "  "))
-
-    var jsonStr = []byte(jsonOutput)
-   
-    reponame = strings.TrimSuffix(reponame, "/")
-    reponame = strings.TrimPrefix(reponame, "/")
+    absPath, _ := filepath.Abs("../"+ branch + ".json")
+    f, err := os.Open(absPath)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer f.Close()
 
     httpposturl := "https://api.github.com/repos/" + reponame + "/merge-upstream"
     fmt.Println("url: %v", httpposturl)
-    request, err := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonStr))
+    request, err := http.NewRequest("POST", httpposturl, f)
     if err != nil {
         log.Fatal(err)
     }
@@ -96,15 +114,14 @@ func fork_refresh_call(branch string, reponame string, method string) (string, e
         log.Fatal(err)
     }
     defer response.Body.Close()
-
+    //fmt.Println("response :", response.Errorf)
+    fmt.Println("response Status:", response.Status)
     b, err := io.ReadAll(response.Body)
+    // b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
     if err != nil {
         log.Fatalln(err)
         return "nil", err
     }
-
-    fmt.Println("response Status:", response.Status)
-    fmt.Println("response Body:", string(b))
     return string(b), nil
     //return fmt.Println(string(b))
 }
