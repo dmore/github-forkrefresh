@@ -51,7 +51,6 @@ func retrieve_secret_from_keychain() (string){
         log.Fatal(err)
     }
 
-    log.Println(secret)
     return secret
 }
 
