@@ -1,6 +1,6 @@
 module github.com/dmore/github-forkrefresh/httpclient
 
-go 1.18
+go 1.21
 
 require github.com/zalando/go-keyring v0.2.3
 
